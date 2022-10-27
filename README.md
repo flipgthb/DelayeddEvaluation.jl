@@ -44,3 +44,8 @@ sort[by=x->x[1]]([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by=x->x[2
     sin.[[0.0,1.0]]
     #-> ERROR: syntax: invalid syntax "sin.[[1, 0]]" around ...
  ```
+
+ ## Packages with similar functionality
+
+[FixArgs.jl](https://github.com/goretkin/FixArgs.jl)
+[ChainedFixes.jl](https://github.com/Tokazama/ChainedFixes.jl)
