@@ -69,8 +69,7 @@ function Base.display(f::DelayEval)
     kw = map(collect(f.kw)) do (;first,second)
             second isa Function ? "$first = $second (some function)" : "$first = $second"
         end|>x->join(x,", ")
-    kw =  
-    println("delayed evaluation: $(f.f)[$(xs)$(ismepty(kw) ? kw : string(", ",kw))]")
+    println("delayed evaluation: $(f.f)[$(xs)$(isempty(kw) ? kw : string(", ",kw))]")
 end
 
 (f::DelayEval)(ys...;kwargs...) = f.f(FillPlaceHolder(f,ys)...;f.kw...,kwargs...)

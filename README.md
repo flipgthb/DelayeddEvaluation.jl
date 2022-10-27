@@ -12,10 +12,20 @@ Simply index a function using a `!` as a placeholder where arguments will be sup
 
 `sin[1.0]() == sin(1.0)`
 
-`map[:,[1,2,3]](x->x+1) = map(x->x+1,[1,2,3])`
+`map[!,[1,2,3]](x->x+1) = map(x->x+1,[1,2,3])`
+
+`mapfoldl[x->x+1,!,[1,2,3]](*) == mapfoldl(x->x+1,*,[1,2,3])`
 
 Keyword arguments are also supported
 
 `sort[by=x->x[1]]([(2,:a),(1,:b)]) == sort([(2,:a),(1,:b)]; by=x->x[1])`
 
 `sort[by=x->x[1]]([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by=x->x[2])`
+
+`DelayEval <: Function`, so composition also works
+
+`(first ∘ getindex[!,2])([(1,:a),(2,:b)]) == first(getindex([(1,:a),(2,:b)],2))`
+
+ and also indexing a `DelayEval` will create a new one
+
+ `getindex[!,2][[(1,:a),(2,:b)]]() == getindex([(1,:a),(2,:b)],2)`
