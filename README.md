@@ -10,22 +10,37 @@ This package extends the functionality of `Base.Fix1` and `Base.Fix2` to any fun
 
 Simply index a function using a `!` as a placeholder where arguments will be supplied on call. Examples:
 
-`sin[1.0]() == sin(1.0)`
+```julia
+sin[1.0]() == sin(1.0)
 
-`map[!,[1,2,3]](x->x+1) = map(x->x+1,[1,2,3])`
+map[!,[1,2,3]](x->x+1) = map(x->x+1,[1,2,3])
 
-`mapfoldl[x->x+1,!,[1,2,3]](*) == mapfoldl(x->x+1,*,[1,2,3])`
+mapfoldl[x->x+1,!,[1,2,3]](*) == mapfoldl(x->x+1,*,[1,2,3])
+```
 
 Keyword arguments are also supported
 
-`sort[by=x->x[1]]([(2,:a),(1,:b)]) == sort([(2,:a),(1,:b)]; by=x->x[1])`
+```julia
+sort[by=x->x[1]]([(2,:a),(1,:b)]) == sort([(2,:a),(1,:b)]; by=x->x[1])
 
-`sort[by=x->x[1]]([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by=x->x[2])`
+sort[by=x->x[1]]([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by=x->x[2])
+```
 
 `DelayEval <: Function`, so composition also works
 
-`(first ∘ getindex[!,2])([(1,:a),(2,:b)]) == first(getindex([(1,:a),(2,:b)],2))`
+```julia
+(first ∘ getindex[!,2])([(1,:a),(2,:b)]) == first(getindex([(1,:a),(2,:b)],2))
+```
 
  and also indexing a `DelayEval` will create a new one
 
- `getindex[!,2][[(1,:a),(2,:b)]]() == getindex([(1,:a),(2,:b)],2)`
+ ```julia
+ getindex[!,2][[(1,:a),(2,:b)]]() == getindex([(1,:a),(2,:b)],2)
+ ```
+
+ Unfortunately, broadcast via indexing syntax sugar is invalid
+
+ ```julia
+    sin.[[0.0,1.0]]
+    #-> ERROR: syntax: invalid syntax "sin.[[1, 0]]" around ...
+ ```
