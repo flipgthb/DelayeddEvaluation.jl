@@ -46,6 +46,13 @@ delay(sort; by=x->x[1])([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by
  ```julia
     delay.(sin,[0.0,1.0]) == [delay(sin,0.0), delay(sin,1.0)]
  ```
+
+ The default `placeholder` is `Colon()`, but you can choose a suitable alternative
+ by passing it as a keyword:
+ 
+ ```julia
+ delay(max,!,1.0; placeholder=(!))(2.0) == max(2.0,1.0)
+ ```
 """
 DelayedEvaluation
 
@@ -90,6 +97,13 @@ delay(sort; by=x->x[1])([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by
  ```julia
     delay.(sin,[0.0,1.0]) == [delay(sin,0.0), delay(sin,1.0)]
  ```    
+
+ The default `placeholder` is `Colon()`, but you can choose a suitable alternative
+ by passing it as a keyword:
+ 
+ ```julia
+ delay(max,!,1.0; placeholder=(!))(2.0) == max(2.0,1.0)
+ ```
 """
 struct DelayEval{F,T} <: Function
     f::F
@@ -143,6 +157,13 @@ delay(sort; by=x->x[1])([(2,:a),(1,:b)]; by=x->x[2]) == sort([(2,:a),(1,:b)]; by
  ```julia
     delay.(sin,[0.0,1.0]) == [delay(sin,0.0), delay(sin,1.0)]
  ```    
+
+ The default `placeholder` is `Colon()`, but you can choose a suitable alternative
+ by passing it as a keyword:
+ 
+ ```julia
+ delay(max,!,1.0; placeholder=(!))(2.0) == max(2.0,1.0)
+ ```
 """
 delay(f::F,x...; kw...) where {F<:Base.Callable} = DelayEval(f,x,kw)
 
@@ -154,26 +175,29 @@ function Base.display(f::DelayEval)
     println("delayed evaluation: $(f.f)($(xs)$(isempty(kw) ? kw : string(", ",kw)))")
 end
 
-(f::DelayEval)(ys...;kwargs...) = f.f(fillholes(f.x,ys)...;f.kw...,kwargs...)
+(f::DelayEval)(ys...;placeholder=Colon(),kwargs...) = f.f(fillholes(f.x,ys;placeholder)...;f.kw...,kwargs...)
 
 """
-Replaces `Colon()` in `tobefilled` by values in `supplier`, appending remaining values to 
-the end.
+Replaces `placeholder`[`==Colon()` by default] in `tobefilled` by values in `supplier`,
+appending remaining values to the end.
 """
-function fillholes(filled,tobefilled,supplier)
-    i = findfirst(==(Colon()),tobefilled)
-    if isnothing(i) || isempty(supplier) || isempty(tobefilled)
+function fillholes(filled,tobefilled,supplier; placeholder=Colon())
+    if isempty(tobefilled) || isempty(supplier)
         return (filled...,tobefilled...,supplier...)
     else
-        x,ys... = supplier
-        return fillholes((filled...,tobefilled[1:i-1]...,x),tobefilled[i+1:end],ys)
+        x,tobefilled_rest = Iterators.peel(tobefilled)
+        supplier_rest = supplier
+        if x == placeholder
+            x,supplier_rest = Iterators.peel(supplier)
+        end
+        return fillholes((filled...,x),tobefilled_rest,supplier_rest)
     end
 end
 
 """
-Replaces `Colon()` in `tobefilled` by values in `supplier`, appending remaining values to 
-the end.
+Replaces `placeholder`[`==Colon()` by default] in `tobefilled` by values in `supplier`,
+appending remaining values to the end.
 """
-fillholes(tobefilled,supplier) = fillholes((),tobefilled,supplier)
+fillholes(tobefilled,supplier; placeholder=Colon()) = fillholes((),tobefilled,supplier; placeholder)
 
 end
